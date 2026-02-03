@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SafeCrowd AI | Tactical Command v2.0</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-deep: #050505;
+            --panel-bg: #0d1117;
+            --ui-glow: #00f2ff;
+            --danger: #ff0055;
+            --warning: #ffaa00;
+            --success: #00ffaa;
+            --text-muted: #8b949e;
+            --border-glow: rgba(0, 242, 255, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Consolas, monospace;
+        }
+
+        body {
+            background: var(--bg-deep);
+            color: #fff;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* HEADER */
+        .header {
+            height: 60px;
+            background: #000;
+            border-bottom: 2px solid var(--ui-glow);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 25px;
+            box-shadow: 0 0 15px var(--border-glow);
+        }
+
+        .system-title {
+            color: var(--ui-glow);
+            font-weight: bold;
+            letter-spacing: 3px;
+            font-size: 1.2rem;
+        }
+
+        /* LAYOUT */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 350px 1fr 400px;
+            height: calc(100vh - 60px);
+            gap: 2px;
+            background: #161b22;
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        /* STATS */
+        .stat-card {
+            border: 1px solid #30363d;
+            padding: 15px;
+            margin-bottom: 15px;
+            background: linear-gradient(145deg, #0d1117, #161b22);
+        }
+
+        .stat-value {
+            font-size: 24px;
+            color: var(--ui-glow);
+            text-shadow: 0 0 10px var(--ui-glow);
+        }
+
+        .risk-gauge {
+            width: 100%;
+            height: 10px;
+            background: #21262d;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .risk-fill {
+            height: 100%;
+            width: 75%;
+            background: linear-gradient(to right, var(--success), var(--warning), var(--danger));
+            box-shadow: 0 0 10px var(--danger);
+        }
+
+        /* BUTTONS */
+        .btn-ui {
+            background: transparent;
+            border: 1px solid var(--ui-glow);
+            color: var(--ui-glow);
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 11px;
+            text-transform: uppercase;
+            transition: 0.3s;
+        }
+
+        .btn-ui:hover {
+            background: var(--ui-glow);
+            color: #000;
+            box-shadow: 0 0 15px var(--ui-glow);
+        }
+
+        /* CAMERA FEEDS */
+        .feed-container {
+            position: relative;
+            background: #000;
+            border: 1px solid #30363d;
+            height: 120px;
+            overflow: hidden;
+        }
+
+        .feed-hud {
+            position: absolute;
+            inset: 0;
+            border: 1px solid rgba(0, 242, 255, 0.2);
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0,0,0,0.05) 0px,
+                rgba(0,0,0,0.05) 1px,
+                transparent 2px
+            );
+            pointer-events: none;
+        }
+
+        .scanning-line {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 242, 255, 0.5);
+            box-shadow: 0 0 10px var(--ui-glow);
+            animation: scan 4s linear infinite;
+        }
+
+        .cam-label {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 10px;
+            background: rgba(0,0,0,0.7);
+            padding: 2px 5px;
+            color: var(--ui-glow);
+            z-index: 2;
+        }
+
+        @keyframes scan {
+            from { top: 0; }
+            to { top: 100%; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div class="system-title">
+        <i class="fa-solid fa-microchip"></i>
+        SAFECROWD // CORE_PROCESSOR_V2.0
+    </div>
+    <div style="display:flex; gap:20px;">
+        <span style="color:var(--success)">[ NEURAL_NET: ONLINE ]</span>
+        <span id="clock" style="color:var(--text-muted)">00:00:00 UTC</span>
+    </div>
+</div>
+
+<!-- MAIN GRID -->
+<div class="main-grid">
+
+    <!-- LEFT PANEL -->
+    <div class="panel">
+        <h3 style="color:var(--ui-glow); font-size:14px; margin-bottom:20px;">
+            TACTICAL METRICS
+        </h3>
+
+        <div class="stat-card">
+            <small>OVERALL DENSITY</small>
+            <div class="stat-value">
+                0.84 <span style="font-size:12px; color:var(--danger)">HIGH</span>
+            </div>
+            <div class="risk-gauge">
+                <div class="risk-fill"></div>
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <small>ACTIVE ENTITY COUNT</small>
+            <div class="stat-value"> 1,234</div>
+            <p style="font-size:10px; color:var(--text-muted)">
+                +12% vs last 5 mins
+            </p>
+        </div>
+    </div>
+
+    <!-- CENTER PANEL -->
+    <div class="panel" style="background:#000;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
+            <h2 style="font-size:16px;">SECTOR_MAP: ALPHA_GROUND</h2>
+            <button class="btn-ui">Toggle Heatmap</button>
+        </div>
+
+        <div style="
+            width:100%;
+            height:80%;
+            border:1px solid #30363d;
+            position:relative;
+            background:url('https://upload.wikimedia.org/wikipedia/commons/9/9a/Sample_Floorplan.png')
+            center/contain no-repeat;
+            filter: invert(1) hue-rotate(180deg) opacity(0.3);
+        ">
+            <div style="
+                position:absolute;
+                top:40%;
+                left:50%;
+                width:100px;
+                height:100px;
+                background:var(--danger);
+                filter:blur(40px);
+                opacity:0.6;
+                border-radius:50%;
+            "></div>
+
+            <div style="
+                position:absolute;
+                top:20%;
+                left:30%;
+                width:80px;
+                height:80px;
+                background:var(--warning);
+                filter:blur(30px);
+                opacity:0.5;
+                border-radius:50%;
+            "></div>
+
+            <div class="scanning-line"></div>
+        </div>
+
+        <div style="margin-top:20px; display:grid; grid-template-columns:repeat(4,1fr); gap:10px;">
+            <button class="btn-ui">Export Data</button>
+            <button class="btn-ui">Calibration</button>
+            <button class="btn-ui">AI Config</button>
+            <button class="btn-ui" style="border-color:var(--danger); color:var(--danger)">
+                Reset Feeds
+            </button>
+        </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel">
+        <h3 style="color:var(--ui-glow); font-size:14px; margin-bottom:15px;">
+            MULTI-CAM FEED
+        </h3>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div class="feed-container">
+                <div class="cam-label">CAM_01 : ENTRANCE</div>
+                <div class="feed-hud"><div class="scanning-line"></div></div>
+            </div>
+
+            <div class="feed-container">
+                <div class="cam-label">CAM_02 : FOOD COURT</div>
+                <div class="feed-hud"><div class="scanning-line" style="animation-delay:1.5s;"></div></div>
+            </div>
+
+            <div class="feed-container">
+                <div class="cam-label">CAM_03 : EXIT NORTH</div>
+                <div class="feed-hud"><div class="scanning-line" style="animation-delay:0.5s;"></div></div>
+            </div>
+
+            <div class="feed-container">
+                <div class="cam-label">CAM_04 : VIP LOUNGE</div>
+                <div class="feed-hud"><div class="scanning-line" style="animation-delay:2s;"></div></div>
+            </div>
+
+            <div class="feed-container">
+                <div class="cam-label">CAM_05 : PARKING ZONE</div>
+                <div class="feed-hud"><div class="scanning-line" style="animation-delay:1s;"></div></div>
+            </div>
+
+            <div class="feed-container">
+                <div class="cam-label">CAM_06 : EMERGENCY EXIT</div>
+                <div class="feed-hud"><div class="scanning-line" style="animation-delay:2.5s;"></div></div>
+            </div>
+        </div>
+
+        <div class="stat-card" style="margin-top:20px;">
+            <small>AI PERFORMANCE</small>
+            <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                <span>LATENCY</span>
+                <span style="color:var(--success)">14ms</span>
+            </div>
+            <div style="display:flex; justify-content:space-between;">
+                <span>ACCURACY</span>
+                <span style="color:var(--ui-glow)">99.2%</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    setInterval(() => {
+        document.getElementById("clock").innerText =
+            new Date().toLocaleTimeString() + " UTC";
+    }, 1000);
+</script>
+
+</body>
+</html>
+
+<script src="admin.js"></script>
+
