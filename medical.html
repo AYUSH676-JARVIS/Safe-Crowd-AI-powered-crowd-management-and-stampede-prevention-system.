@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Safe Crowd | Medical View</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Plus+Jakarta+Sans:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: "#38bdf8",   /* softer sky blue */
+            safe: "#34d399",      /* green-400 */
+            warning: "#f59e0b",
+            danger: "#ef4444",
+            surface: "#071028",   /* deeper, cooler surface */
+            card: "rgba(255, 255, 255, 0.03)",
+            border: "rgba(255, 255, 255, 0.06)"
+          },
+          fontFamily: {
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background: radial-gradient(circle at top right, #0b1220, #071028);
+      background-attachment: fixed;
+      color: #e6eef6; /* lighter, cleaner text */
+    }
+
+    .glass-card {
+      background: rgba(17, 22, 28, 0.65);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      box-shadow: 0 10px 30px rgba(6, 10, 18, 0.6);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    /* Red highlight for the selected feed card */
+    .feed-selected {
+      border-color: rgba(239, 68, 68, 0.95) !important;
+      box-shadow:
+        0 0 0 3px rgba(239,68,68,0.06),
+        0 8px 30px rgba(239,68,68,0.06);
+      transform: translateY(-3px);
+    }
+
+    /* subtle red inner glow on selected video element */
+    .feed-selected video {
+      box-shadow: inset 0 0 40px rgba(239,68,68,0.06);
+    }
+ 
+     ::-webkit-scrollbar { width: 6px; height: 6px; }
+     ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); }
+    ::-webkit-scrollbar-thumb { background: #24303a; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #38bdf8; }
+ 
+     .animate-row { animation: fadeIn 0.3s ease-out forwards; }
+     @keyframes fadeIn {
+       from { opacity: 0; transform: translateY(5px); }
+       to { opacity: 1; transform: translateY(0); }
+     }
+     
+     .scanline {
+      width: 100%; height: 2px; background: rgba(56, 189, 248, 0.28);
+       position: absolute; top: 0; animation: scan 3s linear infinite; opacity: 0.5;
+     }
+     @keyframes scan { 0% { top: 0; } 100% { top: 100%; } }
+   </style>
+</head>
+
+<body class="min-h-screen antialiased font-sans">
+
+<div class="flex h-screen overflow-hidden">
+  
+  <aside class="w-20 lg:w-64 border-r border-border bg-surface flex flex-col items-center lg:items-start py-6 px-4">
+    <div class="mb-10 flex items-center justify-center lg:justify-start w-full">
+         <span class="font-bold text-white tracking-widest hidden lg:block">SAFECROWD</span>
+    </div>
+
+    <nav class="space-y-4 w-full">
+      <div class="text-primary bg-primary/10 p-3 rounded-xl flex items-center justify-center lg:justify-start gap-4 cursor-pointer shadow-[0_0_10px_rgba(0,212,255,0.1)]">
+        <span class="hidden lg:block font-medium">Medical Help</span>
+      </div>
+      <div id="nav-live-feeds" class="text-gray-500 hover:text-white p-3 rounded-xl flex items-center justify-center lg:justify-start gap-4 cursor-pointer transition-all hover:bg-white/5" onclick="toggleLiveFeedsList()">
+        <span class="hidden lg:block font-medium">Live Feeds</span>
+      </div>
+    </nav>
+  </aside>
+  
+  <div class="flex-1 flex flex-col overflow-y-auto" id="main-scroll-container">
+    
+    <header class="sticky top-0 z-10 bg-surface/80 backdrop-blur-md border-b border-border px-8 py-5 flex justify-between items-center">
+      <div>
+        <h1 class="text-2xl font-bold text-white tracking-tight">Medical View</h1>
+      </div>
+    </header>
+
+    <main class="p-8">
+      
+      <div class="grid grid-cols-1 gap-8">
+        
+        <div class="space-y-6">
+          
+          <div id="main-player-card" class="glass-card rounded-2xl overflow-hidden relative border border-white/10 group scroll-mt-24">
+             <div class="absolute top-0 left-0 w-full p-4 bg-gradient-to-b from-black/80 to-transparent z-10 flex justify-between items-start">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
+                        <h3 id="video-title" class="text-white font-bold tracking-wide text-sm">SELECT A FEED</h3>
+                    </div>
+                    <p class="text-[10px] text-primary font-mono mt-1">CAM-ID: <span id="cam-id">--</span></p>
+                </div>
+                <div class="px-2 py-1 bg-black/50 border border-white/10 rounded text-[10px] font-mono text-gray-400">REC ●</div>
+             </div>
+
+             <div class="aspect-video bg-black flex items-center justify-center relative overflow-hidden">
+                <div id="video-scanline" class="hidden scanline"></div>
+                <div id="video-placeholder-content" class="text-center">
+                    <div class="h-12 w-12 border-2 border-gray-700 rounded-full flex items-center justify-center mx-auto mb-3 text-gray-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5l4.72-4.72a.75.75 0 011.28.53v11.38a.75.75 0 01-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 002.25-2.25v-9a2.25 2.25 0 00-2.25-2.25h-9A2.25 2.25 0 002.25 7.5v9a2.25 2.25 0 002.25 2.25z" />
+                        </svg>
+                    </div>
+                    <p class="text-xs text-gray-600 font-mono">NO SIGNAL INPUT</p>
+                    <p class="text-[10px] text-gray-700 mt-1">Click a feed below to view</p>
+                </div>
+                <div id="active-feed-visual" class="hidden absolute inset-0 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                     <p class="text-2xl font-bold text-white/5 animate-pulse">LIVE FEED SIMULATION</p>
+                </div>
+
+                <div id="live-location-box" class="hidden absolute top-4 right-4 bg-black/60 border border-white/10 text-xs text-gray-200 p-3 rounded-md font-mono w-56 shadow-lg backdrop-blur-sm">
+                  <div class="flex justify-between items-start mb-1">
+                    <strong class="text-sm text-white" id="live-place">PLACE NAME</strong>
+                    <span id="live-status" class="text-[11px] text-green-400 font-bold animate-pulse">LIVE</span>
+                  </div>
+                  <div class="text-[12px] text-gray-300">
+                    <div id="live-coords">Lat: --, Lon: --</div>
+                    <div id="live-address" class="text-[11px] text-gray-400 mt-1 truncate">—</div>
+                  </div>
+                </div>
+             </div>
+          </div>
+
+          <div id="live-feeds-list" class="hidden space-y-4">
+             <div class="flex items-center justify-between px-2">
+                 <h3 class="text-primary font-bold uppercase tracking-widest text-sm">Available Camera Feeds</h3>
+                 <button onclick="toggleLiveFeedsList()" class="text-xs text-gray-500 hover:text-white">Hide Grid</button>
+             </div>
+             <div id="feeds-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                </div>
+          </div>
+
+          <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="p-6 border-b border-white/5 flex justify-between items-center">
+              <h3 class="text-lg font-bold text-white">Deployed Units</h3>
+              <span id="active-team-count" class="text-xs font-mono text-primary bg-primary/10 px-2 py-1 rounded">Loading...</span>
+            </div>
+            
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-sm">
+                <thead class="bg-white/5 text-gray-400 text-xs uppercase font-medium">
+                  <tr>
+                    <th class="px-6 py-4">Unit ID</th>
+                    <th class="px-6 py-4">Monitored Feeds (Click to View)</th>
+                    <th class="px-6 py-4">Status</th>
+                    <th class="px-6 py-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="team-table-body" class="divide-y divide-white/5">
+                  </tbody>
+              </table>
+            </div>
+            
+            <div class="p-4 border-t border-white/5 bg-black/20 text-center">
+              <p class="text-xs text-gray-500">End of active list</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+    // --- State Management ---
+    // Pre-filled Mock Data
+    let medicalTeams = [
+        { 
+            id: '1', 
+            teamId: 'MED-ALPHA', 
+            feeds: ['North Gate'], 
+            status: 'Online', 
+            place: 'North Gate Entry', 
+            coords: {lat: 28.6139, lon: 77.2090}, 
+            address: 'Gate 1, Sector 4' 
+        },
+        { 
+            id: '2', 
+            teamId: 'MED-BRAVO', 
+            feeds: ['Main Plaza', 'VIP Lounge'], 
+            status: 'Busy', 
+            place: 'Main Plaza Center', 
+            coords: {lat: 28.6129, lon: 77.2295}, 
+            address: 'Central Hall' 
+        },
+        { 
+            id: '3', 
+            teamId: 'RAPID-RESP', 
+            feeds: ['South Exit'], 
+            status: 'Online', 
+            place: 'South Exit Ramp', 
+            coords: {lat: 28.6100, lon: 77.2300}, 
+            address: 'Exit 4B' 
+        }
+    ];
+
+    // --- DOM Elements ---
+     const videoTitle = document.getElementById('video-title');
+     const camId = document.getElementById('cam-id');
+     const placeholder = document.getElementById('video-placeholder-content');
+     const activeVisual = document.getElementById('active-feed-visual');
+     const scanline = document.getElementById('video-scanline');
+     const activeCountLabel = document.getElementById('active-team-count');
+
+    // Live location elements
+    const liveLocationBox = document.getElementById('live-location-box');
+    const livePlace = document.getElementById('live-place');
+    const liveCoords = document.getElementById('live-coords');
+    const liveAddress = document.getElementById('live-address');
+    const liveStatus = document.getElementById('live-status');
+
+    // --- Initialization ---
+    document.addEventListener('DOMContentLoaded', () => {
+        renderTable();
+        renderLiveFeeds(document.getElementById('feeds-grid-container'));
+    });
+
+    // --- Core Functions ---
+    function renderTable() {
+        const tableBody = document.getElementById('team-table-body');
+        tableBody.innerHTML = '';
+
+        medicalTeams.forEach(team => {
+            const tr = document.createElement('tr');
+            tr.className = 'hover:bg-white/5 transition-colors animate-row border-b border-white/5';
+            
+            const statusClass = team.status === 'Online' ? 'bg-safe/10 text-safe border-safe/20' : 'bg-warning/10 text-warning border-warning/20';
+            const statusDot = team.status === 'Online' ? 'bg-safe animate-pulse' : 'bg-warning';
+
+            // Create clickable feed links
+            const feedsHtml = team.feeds.map(feed => 
+                `<span class="cursor-pointer text-primary hover:text-white hover:underline transition-colors font-bold" 
+                       onclick="playFeed('${feed}', '', '${team.place}', {lat:${team.coords.lat}, lon:${team.coords.lon}}, '${team.address}')">
+                    ${feed}
+                </span>`
+            ).join(', ');
+
+            tr.innerHTML = `
+                <td class="px-6 py-4 font-mono text-white text-sm font-bold">${team.teamId}</td>
+                <td class="px-6 py-4 text-gray-400 text-sm truncate max-w-xs">
+                    ${feedsHtml || '<span class="italic text-gray-600">No feeds assigned</span>'}
+                </td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${statusClass}">
+                        <span class="h-1.5 w-1.5 rounded-full ${statusDot}"></span>
+                        ${team.status}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-right space-x-2">
+                    <button onclick="deleteTeam('${team.id}')" class="text-danger hover:text-red-400 text-xs font-bold uppercase hover:underline transition-all">Recall</button>
+                </td>
+            `;
+            tableBody.appendChild(tr);
+        });
+
+        activeCountLabel.innerText = `${medicalTeams.length} Active Units`;
+    }
+
+    // Function to play a specific feed
+    window.playFeed = function(feedName, videoSource, placeName = 'Unknown Location', coords = null, address = '') {
+         // Scroll to player
+         document.getElementById('main-player-card').scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+         // Update Player UI
+         videoTitle.innerText = feedName.toUpperCase();
+         const randomID = "CAM-" + Math.floor(1000 + Math.random() * 9000);
+         camId.innerText = randomID;
+         placeholder.classList.add('hidden');
+         activeVisual.classList.remove('hidden');
+         scanline.classList.remove('hidden');
+
+         // Populate live-location box
+         livePlace.innerText = placeName;
+         if (coords && typeof coords === 'object' && coords.lat !== undefined && coords.lon !== undefined) {
+           liveCoords.innerText = `Lat: ${coords.lat.toFixed(4)}, Lon: ${coords.lon.toFixed(4)}`;
+         } else {
+           liveCoords.innerText = 'Lat: --, Lon: --';
+         }
+         liveAddress.innerText = address || 'Sector Unknown';
+         liveStatus.innerText = 'LIVE';
+         liveLocationBox.classList.remove('hidden');
+
+         // Visual Simulation of changing feeds (Gradient shift)
+         const hues = [200, 220, 160, 0]; 
+         const hue = hues[Math.floor(Math.random() * hues.length)];
+         activeVisual.style.background = `radial-gradient(circle at center, hsl(${hue}, 20%, 15%), #000)`;
+     }
+ 
+    function deleteTeam(id) {
+        if(confirm("Recall this medical unit?")) {
+            medicalTeams = medicalTeams.filter(t => t.id !== id);
+            renderTable();
+            renderLiveFeeds(document.getElementById('feeds-grid-container'));
+        }
+    }
+
+    // Toggle live feeds list visibility
+    function toggleLiveFeedsList() {
+      const feedsList = document.getElementById('live-feeds-list');
+      const isHidden = feedsList.classList.contains('hidden');
+      
+      if (isHidden) {
+          feedsList.classList.remove('hidden');
+          renderLiveFeeds(document.getElementById('feeds-grid-container'));
+      } else {
+          feedsList.classList.add('hidden');
+      }
+    }
+
+    // Render the clickable live feeds grid
+    function renderLiveFeeds(container) {
+      container.innerHTML = '';
+
+      // collect feeds from teams
+      const allFeeds = [];
+      medicalTeams.forEach(team => {
+        team.feeds.forEach(feedName => {
+          allFeeds.push({
+            name: feedName,
+            teamId: team.teamId,
+            place: team.place,
+            coords: team.coords,
+            address: team.address,
+            // try to use an explicit source if one exists on the team object keyed by feed name
+            source: (team.feedSources && team.feedSources[feedName]) ? team.feedSources[feedName] : ''
+          });
+        });
+      });
+
+      if (allFeeds.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 col-span-3 text-center py-4">No active feeds available.</p>';
+        return;
+      }
+
+      allFeeds.forEach(feed => {
+        const feedCard = document.createElement('div');
+        feedCard.className = 'glass-card rounded-2xl overflow-hidden relative border border-white/10 hover:border-primary transition-all';
+
+        // determine candidate source (fallback to sanitized name)
+        const srcCandidate = feed.source && feed.source.trim() ? feed.source : (`./feeds/${feed.name.replace(/[^a-z0-9]/gi,'_')}.mp4`);
+
+        // build inner structure with a real <video> element (autoplay, muted)
+        feedCard.innerHTML = `
+          <div class="absolute top-0 left-0 w-full p-3 z-10 flex justify-between items-start">
+            <div>
+              <h3 class="text-white font-bold tracking-wide text-xs">${feed.name}</h3>
+              <p class="text-[10px] text-primary font-mono opacity-80">${feed.teamId}</p>
+            </div>
+            <div class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></div>
+          </div>
+          <div class="aspect-video bg-gray-900 rounded overflow-hidden">
+            <video playsinline muted loop class="w-full h-full object-cover" preload="metadata"></video>
+          </div>
+          <div class="p-3 text-xs text-gray-300">
+            <div class="font-medium text-white">${feed.place || feed.address || '--'}</div>
+            <div class="text-gray-400 mt-1">${feed.coords ? `Lat: ${feed.coords.lat.toFixed(4)}, Lon: ${feed.coords.lon.toFixed(4)}` : 'Lat: --, Lon: --'}</div>
+          </div>
+        `;
+
+        // attach click handler to open in main player
+        feedCard.addEventListener('click', () => playFeed(feed.name, srcCandidate, feed.place, feed.coords, feed.address));
+
+        // attach source to video element and attempt autoplay (muted allowed)
+        const vid = feedCard.querySelector('video');
+        vid.src = srcCandidate;
+        const p = vid.play();
+        if (p && p.catch) p.catch(()=>{/* ignore autoplay blocked */});
+
+        container.appendChild(feedCard);
+      });
+    }
+</script>
+
+</body>
+</html>

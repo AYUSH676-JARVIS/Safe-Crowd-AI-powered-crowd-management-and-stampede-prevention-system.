@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stampede Medical Dashboard</title>
+  <link rel="stylesheet" href="css/styles.css" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/main.js" defer></script>
+  <script src="js/medical.js" defer></script>
+  <script src="js/feeds.js" defer></script>
+</head>
+<body class="min-h-screen antialiased font-sans bg-gray-900 text-gray-200">
+
+  <header class="bg-gray-800 p-4">
+    <h1 class="text-2xl font-bold">Stampede Medical Dashboard</h1>
+  </header>
+
+  <main class="p-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left column: Add feeds + available feeds -->
+      <section class="lg:col-span-1">
+        <h2 class="text-lg font-bold mb-4">Add New Feed</h2>
+        <form id="feed-form" class="space-y-4">
+          <input type="text" id="feed-name" placeholder="Feed Name (e.g. North Gate)" class="w-full p-2 rounded bg-gray-700 border border-gray-600" required />
+          <input type="text" id="feed-source" placeholder="Feed Source (url or id)" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+          <input type="text" id="feed-loc" placeholder="Location (lat,lon)" class="w-full p-2 rounded bg-gray-700 border border-gray-600" />
+          <button type="submit" class="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded">Add Feed</button>
+        </form>
+
+        <h3 class="text-lg font-bold mt-6">Available Feeds</h3>
+        <ul id="available-feeds" class="space-y-2"></ul>
+      </section>
+
+      <!-- Right column: Camera grid + deployed units -->
+      <section class="lg:col-span-2">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold">Live Feeds</h2>
+          <button id="show-active-btn" class="text-sm bg-primary/10 px-3 py-1 rounded text-primary">Show Active Cameras</button>
+        </div>
+
+        <!-- Camera view preview (single selected) -->
+        <div id="camera-view" class="bg-gray-800 h-64 rounded-lg relative overflow-hidden flex items-center justify-center">
+          <p id="camera-placeholder" class="text-gray-500">Select a feed to view the camera.</p>
+          <!-- live location overlay -->
+          <div id="camera-live-location" class="hidden absolute top-4 right-4 bg-black/60 border border-gray-700 text-xs text-gray-200 p-2 rounded-md font-mono w-52">
+            <div class="flex justify-between items-center">
+              <strong id="loc-place" class="text-sm text-white">PLACE</strong>
+              <span id="loc-status" class="text-xs text-green-400">LIVE</span>
+            </div>
+            <div id="loc-coords" class="text-[12px] text-gray-300 mt-1">Lat: --, Lon: --</div>
+          </div>
+        </div>
+
+        <!-- Grid of active camera cards (hidden by default) -->
+        <div id="active-cameras" class="hidden grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-4"></div>
+
+        <h3 class="text-lg font-bold mt-6">Deployed Units</h3>
+        <div id="deployed-units" class="bg-gray-800 p-4 rounded-lg">
+          <p id="deployed-placeholder" class="text-gray-500">No units deployed.</p>
+          <ul id="deployed-list" class="mt-2 space-y-2"></ul>
+        </div>
+      </section>
+    </div>
+  </main>
+
+</body>
+</html>
