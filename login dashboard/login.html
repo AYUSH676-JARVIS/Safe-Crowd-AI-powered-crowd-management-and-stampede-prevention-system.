@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SafeCrowd Login</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="container">
+
+  <!-- Logo -->
+  <img src="image.png.jpeg" alt="SafeCrowd Logo" class="logo">
+
+  <!-- Title -->
+  <h1>SafeCrowd</h1>
+  <p class="subtitle">Preventing Stampedes</p>
+
+  <!-- Login Box -->
+  <div class="login-box">
+
+    <div class="field">
+      <input type="text" id="username" placeholder="Username" />
+    </div>
+
+    <div class="field">
+      <input type="password" id="password" placeholder="Password" />
+    </div>
+
+    <!-- Role Dropdown -->
+    <div class="field">
+      <select id="role">
+        <option value="">Select Role</option>
+        <option value="operator">Operator Dashboard</option>
+        <option value="medical">Medical Team</option>
+        <option value="admin">Admin Panel</option>
+      </select>
+    </div>
+
+    <!-- Login Button -->
+    <button class="login-btn" onclick="login()">Login</button>
+
+  </div>
+
+</div>
+
+<script>
+function login() {
+  const role = document.getElementById("role").value;
+
+  if (!role) {
+    alert("Please select a role!");
+    return;
+  }
+
+  if (role === "operator") {
+    window.location.href = "/operator/index.html";
+  } else if (role === "medical") {
+    window.location.href = "/medical/index.html";
+  } else if (role === "admin") {
+    window.location.href = "/admin/index.html";
+  }
+}
+</script>
+
+</body>
+</html>
