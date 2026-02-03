@@ -1,22 +1,20 @@
-// This file contains the logic specific to the medical dashboard. 
-// It manages the interactions with the medical view, including displaying camera feeds and updating the deployed units list.
 
 let medicalTeams = [];
 let availableFeeds = [];
 
-// --- DOM Elements ---
+
 const form = document.getElementById('team-assignment-form');
 const tableBody = document.getElementById('team-table-body');
 const activeCountLabel = document.getElementById('active-team-count');
-const feedInput = document.getElementById('feed-input'); // Input for adding new feeds
-const feedList = document.getElementById('feed-list'); // List to display available feeds
+const feedInput = document.getElementById('feed-input'); 
+const feedList = document.getElementById('feed-list'); 
 
-// --- Initialization ---
+
 document.addEventListener('DOMContentLoaded', () => {
     renderTable();
 });
 
-// --- Core Functions ---
+
 
 function renderTable() {
     tableBody.innerHTML = ''; 
