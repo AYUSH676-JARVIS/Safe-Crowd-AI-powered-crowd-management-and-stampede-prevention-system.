@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safe Crowd</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+    <header class="navbar">
+        <div class="nav-brand">
+            <div class="live-dot"></div> 
+            Safe Crowd - Operator Panel
+        </div>
+        <div class="nav-actions">
+            <div class="btn">OP-12345</div>
+            <button class="btn btn-connected"><i data-lucide="wifi"></i> Connected</button>
+            <button class="btn btn-stop"><i data-lucide="octagon"></i> Stop Monitoring</button>
+            <button class="btn"><i data-lucide="home"></i> Home</button>
+        </div>
+    </header>
+
+    <div class="dashboard-grid">
+        <main class="primary-col">
+            <div class="summary-bar">
+                <div class="stat-card">
+                    <i data-lucide="activity" style="color:var(--accent-blue); width:16px;"></i> 
+                    <div><p>Total Alerts</p><h3>0</h3></div>
+                </div>
+                <div class="stat-card">
+                    <i data-lucide="alert-triangle" style="color:var(--warning); width:16px;"></i> 
+                    <div><p>Active Alerts</p><h3>0</h3></div>
+                </div>
+                <div class="stat-card">
+                    <i data-lucide="shield-alert" style="color:var(--danger); width:16px;"></i> 
+                    <div><p>Danger</p><h3>0</h3></div>
+                </div>
+                <div class="stat-card">
+                    <i data-lucide="alert-circle" style="color:var(--warning); width:16px;"></i> 
+                    <div><p>Warning</p><h3>0</h3></div>
+                </div>
+            </div>
+
+            <div class="video-container">
+                <div class="feed-header">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <h2 style="font-size: 13px;">PRIMARY FEED: AREA 01</h2>
+                        <span class="badge">Live</span>
+                    </div>
+                    <span style="color: var(--danger); font-size: 10px; font-weight: 800;">● ANALYZING</span>
+                </div>
+
+                <div class="viewport">
+                    <div class="viewport-placeholder">
+                        <i data-lucide="scan-eye"></i>
+                        <p style="font-size: 11px;">Waiting for Camera Stream...</p>
+                    </div>
+                </div>
+
+                <div class="feed-footer">
+                    <div class="metric-grid">
+                        <div class="metric-item"><small>PEOPLE</small><strong>158</strong></div>
+                        <div class="metric-item"><small>DENSITY</small><strong>0.53</strong></div>
+                        <div class="metric-item"><small>AREA (m²)</small><strong>296</strong></div>
+                    </div>
+                    
+                    <div class="control-group">
+                        <div class="input-wrapper">
+                            <input type="number" value="300">
+                            <i data-lucide="edit-3"></i>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary">Calibrate</button>
+                </div>
+            </div>
+        </main>
+
+        <aside class="sidebar">
+            <div class="sidebar-title">Live Alerts</div>
+            <div class="empty-state">
+                <i data-lucide="check-circle" style="color: var(--success); margin-bottom: 10px;"></i>
+                <p>System Clear</p>
+            </div>
+        </aside>
+    </div>
+
+    <script>lucide.createIcons();</script>
+</body>
+</html>
